@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .big {
+            width: 500px;
+            height: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: antiquewhite;
+        }
+
+        .small {
+            width: 18px;
+            height: 18px;
+            border: 1px solid peachpuff;
+            float: left;
+        }
+
+        .fen {
+            width: 200px;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 28px;
+            border-radius: 15px;
+            height: 60px;
+            line-height: 60px;
+            margin-top: 20px;
+            background-color: bisque;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="big" id="big">
+
+    </div>
+    <div class="fen">红方当前得分<span>0</span></div>
+    <div class="fen">蓝方当前得分<span>0</span></div>
+    <script>
+        let big = document.getElementById("big");
+        for (i = 0; i < 25; i++) {                //初始化地图
+            for (j = 0; j < 25; j++) {
+                var small = document.createElement("div");
+                small.className = "small";
+                small.id = "num-" + i + "-" + j;
+                big.appendChild(small);
+            }
+        }
+        let fen;
+        let fen2;
+        let sw_h;   //食物的横坐标
+        let sw_l;   //食物的纵坐标
+        let fens = document.getElementsByTagName("span")[0];
+        let fen2s = document.getElementsByTagName("span")[1];
+        let ss = {               //初始化定义蛇身为一个对象
+            0: [10, 13],         //属性值为每一块蛇身的坐标
+            1: [10, 14],
+            2: [10, 15],
+            3: [10, 16],
+            4: [10, 17],
+            5: [10, 18]
+        };
+        let sss = {                //第二条蛇
+            0: [16, 13],         //属性值为每一块蛇身的坐标
+            1: [16, 14],
+            2: [16, 15],
+            3: [16, 16],
+            4: [16, 17],
+            5: [16, 18]
+        }
+        function sw() {       //生成一个食物
+            var x;
+            var y;
+            do {
+                x = Math.floor(Math.random() * 25);
+                y = Math.floor(Math.random() * 25);
+            }
+            while (document.getElementById("num-" + x + "-" + y).style.background == "red" || document.getElementById("num-" + x + "-" + y).style.background == "aqua");   //直到生成的坐标盒子颜色不为红色  停止循环
+            document.getElementById("num-" + x + "-" + y).style.background = "blue";
+            sw_h = x;
+            sw_l = y;
+
+            // var x = Math.floor(Math.random() * 3)+10;
+            // var y = Math.floor(Math.random() * 3)+10;
+            // if (document.getElementById("num-" + x + "-" + y).style.background == "red") {
+            //     x = Math.floor(Math.random() * 3)+10;
+            //     y = Math.floor(Math.random() * 3)+10;
+            //     document.getElementById("num-" + x + "-" + y).style.background = "blue"
+            //     sw_h = x;
+            //     sw_l = y;
+            // }
+            // else {
+            //     document.getElementById("num-" + x + "-" + y).style.background = "blue"
+            //     sw_h = x;
+            //     sw_l = y;
+            // }
+        }
+        // console.log(document.getElementById("num-13-13"))
+        function xianxing() {     //让蛇显性  清除上一步的尾巴
+            for (i = 0; i < 25; i++) {
+                for (j = 0; j < 25; j++) {
+                    var huanyuan = document.getElementById("num-" + i + "-" + j)
+                    if (huanyuan.style.background == "blue") {
+
+                    }
+                    else {
+                        huanyuan.style.background = "antiquewhite"
+                    }
+                }
+            }
+            fen = -1;
+            for (key in ss) {
+                var hang = ss[key][0];
+                var lie = ss[key][1];
+                var ssk = document.getElementById("num-" + hang + "-" + lie);
+                ssk.style.background = "red";          //蛇身位置为红色
+                fen++;
+            }
+            fen2 = -1;
+            for (key in sss) {
+                var hang = sss[key][0];
+                var lie = sss[key][1];
+                var ssk = document.getElementById("num-" + hang + "-" + lie);
+                ssk.style.background = "aqua";          //蛇身位置为青色
+                fen2++;
+            }
+        }
+        // function cshxianxing() {     //重新开始时让蛇显性  蓝色食物也清除
+        //     for (i = 0; i < 25; i++) {
+        //         for (j = 0; j < 25; j++) {
+        //             var huanyuan = document.getElementById("num-" + i + "-" + j)
+        //                 huanyuan.style.background = "antiquewhite"
+
+
+        //         }
+        //     }
+        //     fen = -1;
+        //     for (key in ss) {
+
+
+        //         var hang = ss[key][0];
+        //         var lie = ss[key][1];
+        //         var ssk = document.getElementById("num-" + hang + "-" + lie);
+        //         ssk.style.background = "red";
+        //         fen++;
+        //     }
+        // }
+        xianxing();
+        //console.log(fen);
+        sw();
+        // function quwei() {        //将尾巴去掉
+        //     l = fen + 5;
+        //     var sss = document.getElementById("num-" + ss[l][0] + "-" + ss[l][1])
+        //     sss.style.background = "antiquewhite";
+        // }
+        function gameover() {         //判断游戏是否结束
+            // for (i = 1; i < fen; i++) {
+            //     if (ss[i][0] == ss[0][0] && ss[i][1] == ss[0][1]) { //判断是否撞到自己
+            //         clearInterval(kk);                            // 停止函数循环   弹出凉凉
+            //         alert("凉凉");
+            //         window.location.reload();
+            //     }s
+            // }
+            for (i = 1; i < fen2; i++) {
+                if (sss[i][0] == ss[0][0] && sss[i][1] == ss[0][1]) { //判断是否撞到对方
+                    clearInterval(kk); 
+                    clearInterval(kks);                           // 停止函数循环   弹出凉凉
+                    alert("小红凉凉");
+                    window.location.reload();
+                }
+            }
+            for (i = 1; i < fen; i++) {
+                if (ss[i][0] == sss[0][0] && ss[i][1] == sss[0][1]) { //判断是否撞到对方
+                    clearInterval(kk);
+                    clearInterval(kks);                            // 停止函数循环   弹出凉凉
+                    alert("小蓝凉凉");
+                    window.location.reload();
+                }
+            }
+            if (sss[0][0] > 24 || sss[0][0] < 0 || sss[0][1] > 24 || sss[0][1] < 0) { //判断是否撞墙
+                clearInterval(kks);
+                clearInterval(kk);
+                alert("小蓝凉凉");
+                window.location.reload();
+            }
+            if (ss[0][0] > 24 || ss[0][0] < 0 || ss[0][1] > 24 || ss[0][1] < 0) { //判断是否撞墙
+                clearInterval(kk);
+                clearInterval(kks);
+                alert("小红凉凉");
+                window.location.reload();
+            }
+            else {
+                xianxing();
+            }
+        }
+        function dosome() {
+            var weiba = ss[fen];
+            if (ss[0][0] == sw_h && ss[0][1] == sw_l) {
+                ss[fen + 1] = weiba;
+                xianxing();
+                sw();
+            }
+            else {
+                gameover()
+            }
+            if (fen == 624) {
+                clearInterval(kk);
+                alert("你赢了")
+            }
+            fens.innerHTML = fen - 5;
+        }
+        function dosomes() {
+            var weiba = sss[fen];
+            if (sss[0][0] == sw_h && sss[0][1] == sw_l) {
+                sss[fen + 1] = weiba;
+                xianxing();
+                sw();
+            }
+            else {
+                gameover()
+            }
+            if (fen2 == 624) {
+                clearInterval(kks);
+                alert("你赢了")
+            }
+            fen2s.innerHTML = fen2 - 5;
+        }
+        function zhuo() {
+            // quwei();
+            var weiba = ss[fen];
+            for (i = fen; i > 0; i--) {
+                ss[i] = ss[i - 1]   //让每块蛇身坐标等于上一块蛇身
+            };
+
+            ss[0] = [ss[0][0], ss[0][1] - 1];//第一块蛇身坐标向左移动一格
+            dosome();
+        }
+        //2222左
+        function zhuos() {
+            // quwei();
+            var weiba = sss[fen];
+            for (i = fen2; i > 0; i--) {
+                sss[i] = sss[i - 1]   //让每块蛇身坐标等于上一块蛇身
+            };
+
+            sss[0] = [sss[0][0], sss[0][1] - 1];//第一块蛇身坐标向左移动一格
+            dosomes();
+        }
+        function you() {          //向右移动
+            // quwei();
+            var weiba = ss[fen];
+            for (i = fen; i > 0; i--) {
+                ss[i] = ss[i - 1]   //让每块蛇身坐标等于上一块蛇身
+            };
+
+            ss[0] = [ss[0][0], ss[0][1] + 1];//第一块蛇身坐标向you移动一格
+            dosome();
+        }
+        //2222右
+        function yous() {          //向右移动
+            // quwei();
+            var weiba = sss[fen];
+            for (i = fen2; i > 0; i--) {
+                sss[i] = sss[i - 1]   //让每块蛇身坐标等于上一块蛇身
+            };
+
+            sss[0] = [sss[0][0], sss[0][1] + 1];//第一块蛇身坐标向you移动一格
+            dosomes();
+        }
+        function shang() {              //向上移动
+            // quwei();
+            var weiba = ss[fen];
+            for (i = fen; i > 0; i--) {
+                ss[i] = ss[i - 1]   //让每块蛇身坐标等于上一块蛇身
+            };
+
+            ss[0] = [ss[0][0] - 1, ss[0][1]];//第一块蛇身坐标向shang移动一格
+            dosome();
+        }
+        //2222上
+        function shangs() {              //向上移动
+            // quwei();
+            var weiba = sss[fen];
+            for (i = fen2; i > 0; i--) {
+                sss[i] = sss[i - 1]   //让每块蛇身坐标等于上一块蛇身
+            };
+
+            sss[0] = [sss[0][0] - 1, sss[0][1]];//第一块蛇身坐标向shang移动一格
+            dosomes();
+        }
+        function xia() {                //向下移动
+            // quwei();
+            var weiba = ss[fen];
+            for (i = fen; i > 0; i--) {
+                ss[i] = ss[i - 1]   //让每块蛇身坐标等于上一块蛇身
+            };
+            ss[0] = [ss[0][0] + 1, ss[0][1]];//第一块蛇身坐标向xia移动一格
+            dosome();
+        }
+        //222下
+        function xias() {                //向下移动
+            // quwei();
+            var weiba = sss[fen];
+            for (i = fen2; i > 0; i--) {
+                sss[i] = sss[i - 1]   //让每块蛇身坐标等于上一块蛇身
+            };
+            sss[0] = [sss[0][0] + 1, sss[0][1]];//第一块蛇身坐标向xia移动一格
+            dosomes();
+        }
+        let kk;
+        let kks;
+        let fs;
+        let fss;
+        let kais = setInterval(zhuo, 390);
+        let kaiss = setInterval(zhuos, 390);
+        function kongzhi() {       //按键控制移动方向
+            if (event.keyCode >= 37 && event.keyCode <= 40) {
+                clearInterval(kais);
+                
+            }else if(event.keyCode == 65 || event.keyCode == 68||event.keyCode == 83||event.keyCode ==87 ){
+                clearInterval(kaiss);
+                
+            }
+                clearInterval(kk);
+                clearInterval(kks);
+            // console.log(fs);
+            if (event.keyCode == 37) {  //左 
+                //  console.log(fs);
+                if (fs == you) {          //相反方向不能直接拐弯 防止直接掉头
+                    //console.log(fs);
+                }
+                else {
+                    zhuo();
+                    fs = zhuo;
+                }
+            }
+             //左 sss
+            if (event.keyCode == 65) {  //左 ssss
+                //  console.log(fs);
+                if (fss == yous) {          //相反方向不能直接拐弯 防止直接掉头
+                    //console.log(fs);
+                }
+                else {
+                    zhuos();
+                    fss = zhuos;
+                }
+            }
+            if (event.keyCode == 38) {//上
+                if (fs === xia) {
+                }
+                else {
+                    shang();
+                    fs = shang;
+                }
+            }
+            //上sss
+            if (event.keyCode == 87) {
+                if (fss === xias) {
+                }
+                else {
+                    shangs();
+                    fss = shangs;
+                }
+            }
+            if (event.keyCode == 39) {//右 
+                if (fs === zhuo) {
+                }
+                else {
+                    you();
+                    fs = you;
+                }
+            }
+            //右sss
+            if (event.keyCode == 68) {//右 
+                if (fss == zhuos) {
+                }
+                else {
+                    yous();
+                    fss = yous;
+                }
+            }
+            if (event.keyCode == 40) {//下 
+                if (fs === shang) {
+                }
+                else {
+                    xia();
+                    fs = xia;
+                }
+            }
+            //下 ssss
+            if (event.keyCode == 83) {//下 
+                if (fss === shangs) {
+                }
+                else {
+                    xias();
+                    fss = xias;
+                }
+            }
+            kk = setInterval(fs, 300);
+            kks = setInterval(fss, 300);
+        }
+        document.onkeydown = kongzhi;
+    </script>
+</body>
+
+</html>
